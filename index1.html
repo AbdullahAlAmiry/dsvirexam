@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>بنك أسئلة اللغة الإنجليزية - اختبار تفاعلي</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Tajawal', sans-serif;
+    }
+    .font-en {
+      font-family: 'Inter', sans-serif;
+      direction: ltr;
+      text-align: left;
+    }
+    .custom-shadow {
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-indigo-900 text-white shadow-lg sticky top-0 z-30">
+    <div class="max-w-5xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-700/80 flex items-center justify-center font-bold text-xl text-indigo-200">
+          🇬🇧
+        </div>
+        <div>
+          <h1 class="text-lg sm:text-xl font-bold leading-tight">بنك أسئلة اللغة الإنجليزية</h1>
+          <p class="text-xs text-indigo-300">اختبار تفاعلي شامل مع الترجمة وشرح القواعد</p>
+        </div>
+      </div>
+
+      <!-- Stats Bar -->
+      <div class="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm">
+        <div class="bg-indigo-800/80 px-3 py-1.5 rounded-lg border border-indigo-700/50 flex items-center gap-1.5">
+          <span class="text-emerald-400 font-bold" id="headerCorrectCount">0</span>
+          <span class="text-indigo-300">صح</span>
+          <span class="text-slate-400">|</span>
+          <span class="text-rose-400 font-bold" id="headerWrongCount">0</span>
+          <span class="text-indigo-300">خطأ</span>
+        </div>
+        <button id="resetQuizBtn" class="bg-indigo-700 hover:bg-indigo-600 active:scale-95 text-white px-3 py-1.5 rounded-lg text-xs transition duration-150 flex items-center gap-1">
+          🔄 إعادة
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Control & Filter Bar -->
+  <div class="bg-white border-b border-slate-200 sticky top-[57px] sm:top-[69px] z-20 shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
+      <!-- Mode Toggle -->
+      <div class="flex items-center bg-slate-100 p-1 rounded-xl text-xs font-semibold">
+        <button id="modePractice" class="px-3 py-1.5 rounded-lg bg-white shadow text-indigo-700 transition font-bold">
+          💡 تصحيح فوري
+        </button>
+        <button id="modeTest" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-indigo-700 transition font-medium">
+          📝 وضع الامتحان الكامل
+        </button>
+      </div>
+
+      <!-- Filters -->
+      <div class="flex items-center gap-1 text-xs overflow-x-auto pb-1 sm:pb-0">
+        <button data-filter="all" class="filter-btn active px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-bold border border-indigo-200">
+          الكل (<span id="totalCountBadge">0</span>)
+        </button>
+        <button data-filter="wrong" class="filter-btn px-2.5 py-1 rounded-lg text-slate-600 hover:bg-slate-100">
+          الخاطئة (<span id="wrongCountBadge">0</span>)
+        </button>
+        <button data-filter="unanswered" class="filter-btn px-2.5 py-1 rounded-lg text-slate-600 hover:bg-slate-100">
+          المتبقية (<span id="unansweredCountBadge">0</span>)
+        </button>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="w-full bg-slate-100 h-1.5">
+      <div id="progressBar" class="bg-indigo-600 h-1.5 transition-all duration-300 w-0"></div>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <main class="max-w-5xl mx-auto px-4 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+    <!-- Questions Area -->
+    <div class="lg:col-span-3 space-y-4" id="questionsContainer">
+      <!-- Questions will be injected here via JavaScript -->
+    </div>
+
+    <!-- Sidebar / Question Navigator -->
+    <aside class="lg:col-span-1">
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 custom-shadow sticky top-28 space-y-4">
+        <div class="flex items-center justify-between border-b pb-3">
+          <h2 class="font-bold text-sm text-slate-700">خريطة الأسئلة</h2>
+          <span class="text-xs text-slate-400" id="progressStatus">0 / 0</span>
+        </div>
+
+        <div class="grid grid-cols-5 gap-1.5 max-h-[350px] overflow-y-auto p-1" id="navigatorGrid">
+          <!-- Question buttons injected here -->
+        </div>
+
+        <div class="text-[11px] text-slate-500 space-y-1.5 pt-2 border-t border-slate-100">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-emerald-500"></span> إجابة صحيحة
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-rose-500"></span> إجابة خاطئة
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-slate-200"></span> لم تُحل بعد
+          </div>
+        </div>
+
+        <div id="examSubmitContainer" class="hidden pt-2">
+          <button id="finishExamBtn" class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow-md">
+            إنهاء الامتحان ورؤية النتيجة
+          </button>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- Score Modal -->
+  <div id="resultModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full text-center space-y-5 shadow-2xl">
+      <div id="modalIcon" class="text-5xl">🎉</div>
+      <h3 class="text-2xl font-black text-slate-800" id="modalTitle">اكتمل الاختبار!</h3>
+      <div class="p-4 bg-indigo-50 rounded-2xl space-y-2">
+        <p class="text-sm text-indigo-700">نتيجتك النهائية:</p>
+        <p class="text-4xl font-extrabold text-indigo-900" id="finalScoreDisplay">0 / 0</p>
+        <p class="text-xs text-indigo-600 font-semibold" id="finalPercentage">0%</p>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="closeModal()" class="flex-1 py-2.5 px-4 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 transition">
+          مراجعة الإجابات
+        </button>
+        <button onclick="restartQuiz()" class="flex-1 py-2.5 px-4 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition">
+          إعادة المحاولة
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questionsData = [
+      {
+        id: 1,
+        question: "Can you call me back later? I ............ my assignment.",
+        questionAr: "هل يمكنك معاودة الاتصال بي لاحقاً؟ أنا أقوم بعمل واجبي الآن.",
+        options: ["do", "doing", "am doing"],
+        correctIndex: 2,
+        explanation: "قاعدة المضارع المستمر (Present Continuous): نستخدم (am + v-ing) لأن الحدث يقع الآن في لحظة التحدث (call me back later)."
+      },
+      {
+        id: 2,
+        question: "I like to spend time with my friends. That's what ............ me happy.",
+        questionAr: "أحب قضاء الوقت مع أصدقائي. هذا ما يجعلني سعيداً.",
+        options: ["makes", "make", "is making"],
+        correctIndex: 0,
+        explanation: "قاعدة المضارع البسيط: الفاعل هنا هو العبارة الاسمية الممثلة بضمير المفرد غير العاقل (That's what)، وفي المفرد يضاف للفعل (s)."
+      },
+      {
+        id: 3,
+        question: "She always ............ a book to her son before he goes to sleep.",
+        questionAr: "هي دائماً تقرأ كتاباً لابنها قبل أن يذهب للنوم.",
+        options: ["read", "reads", "is reading"],
+        correctIndex: 1,
+        explanation: "مضارع بسيط يعبر عن عادة متكررة بوجود كلمة (always)، ومع الضمير المفرد الغائب (She) يأخذ الفعل حرف (s)."
+      },
+      {
+        id: 4,
+        question: "He doesn't like fish. He ............ eats it.",
+        questionAr: "هو لا يحب السمك، هو لا يأكله أبداً.",
+        options: ["always", "usually", "never"],
+        correctIndex: 2,
+        explanation: "كلمة (never) تعني أبداً وتفيد النفي التام مع الإبقاء على شكل الفعل مثبتاً (never eats)."
+      },
+      {
+        id: 5,
+        question: "John gets a ............ for his good work.",
+        questionAr: "حصل جون على مكافأة إضافية تقديراً لعمله الجيد.",
+        options: ["bonus", "salary", "task"],
+        correctIndex: 0,
+        explanation: "مفردات: (bonus) تعني مكافأة إضافية عن العمل الجيد، بينما (salary) هو الراتب الأساسي، و(task) تعني مهمة."
+      },
+      {
+        id: 6,
+        question: "Rescue workers often ............ their lives to help other people in danger.",
+        questionAr: "غالباً ما يُخاطر عمال الإنقاذ بحياتهم لمساعدة المعرضين للخطر.",
+        options: ["save", "risk", "take care"],
+        correctIndex: 1,
+        explanation: "المصطلح الشائع هو (risk their lives) بمعنى يُخاطرون بحياتهم."
+      },
+      {
+        id: 7,
+        question: "They ............ late for school.",
+        questionAr: "هم دائماً متأخرون عن المدرسة.",
+        options: ["never are", "always are", "are always"],
+        correctIndex: 2,
+        explanation: "قاعدة موقع ظروف التكرار (Adverbs of frequency): تأتي ظروف التكرار (always / never) دائماً بعد فعل يكون (Verb to be) وليس قبله."
+      },
+      {
+        id: 8,
+        question: "Mark ............ in London.",
+        questionAr: "مارك يعيش في لندن.",
+        options: ["live", "lives", "am living"],
+        correctIndex: 1,
+        explanation: "مضارع بسيط يعبر عن حقيقة/استقرار دائم، والفاعل مفرد غائب (Mark) فيضاف للفعل (s)."
+      },
+      {
+        id: 9,
+        question: "A ............ is a person employed to report for a newspaper or broadcasting from abroad.",
+        questionAr: "هو الشخص المعين لكتابة التقارير لصحيفة أو البث الإذاعي من الخارج.",
+        options: ["actress", "foreign correspondent", "fashion designer"],
+        correctIndex: 1,
+        explanation: "مفردات الوظائف: (foreign correspondent) تعني مراسل صحفي أجنبي/خارجي."
+      },
+      {
+        id: 10,
+        question: "How often do you ............ a snack?",
+        questionAr: "كم مرة تتناول وجبة خفيفة؟",
+        options: ["spend", "go", "have"],
+        correctIndex: 2,
+        explanation: "المتلازمات اللفظية (Collocations): نستخدم الفعل (have) مع الوجبات والمأكولات الخفيفة (have a snack / have lunch)."
+      },
+      {
+        id: 11,
+        question: "We ............ our final exam at the moment.",
+        questionAr: "نحن نؤدي امتحاننا النهائي في هذه اللحظة.",
+        options: ["took", "are taking", "take"],
+        correctIndex: 1,
+        explanation: "وجود العبارة الدالة (at the moment) يوجب استخدام المضارع المستمر (are + verb-ing) مع ضمير الجمع (We)."
+      },
+      {
+        id: 12,
+        question: "My job is difficult, but I get a good ............",
+        questionAr: "وظيفتي صعبة، لكني أتقاضى راتباً جيداً.",
+        options: ["customer", "task", "salary"],
+        correctIndex: 2,
+        explanation: "مفردات: (salary) تعني الراتب الشهري أو الدوري مقابل الوظيفة."
+      },
+      {
+        id: 13,
+        question: "I like to ............ shopping.",
+        questionAr: "أحب أن أذهب للتسوق.",
+        options: ["go", "have", "do"],
+        correctIndex: 0,
+        explanation: "متلازمة لفظية: الأنشطة التي تنتهي بـ (ing) مثل التسوق والسباحة تأخذ الفعل (go): go shopping."
+      },
+      {
+        id: 14,
+        question: "I ............ my assignment last night.",
+        questionAr: "أنا لم أنهِ واجبي الليلة الماضية.",
+        options: ["am finishing", "didn't finish", "finish"],
+        correctIndex: 1,
+        explanation: "قاعدة الماضي البسيط: الكلمة الدالة (last night) تشير للماضي، والنفي في الماضي البسيط يكون بـ (didn't + المصدر)."
+      },
+      {
+        id: 15,
+        question: "Doctors ............ their lives to protect us during COVID 19.",
+        questionAr: "خاطر الأطباء بحياتهم لحمايتنا أثناء أزمة كوفيد 19.",
+        options: ["risk", "rescue", "deal"],
+        correctIndex: 0,
+        explanation: "تعبير لغوي: (risk lives) يعني يُخاطر بالأرواح."
+      },
+      {
+        id: 16,
+        question: "How often do you play tennis? - I ............ it twice a week.",
+        questionAr: "كم مرة تلعب التنس؟ - ألعبها مرتين في الأسبوع.",
+        options: ["plays", "play", "am playing"],
+        correctIndex: 1,
+        explanation: "السؤال بـ (How often) والإجابة بـ (twice a week) تعبر عن روتين متكرر، لذا نستخدم المضارع البسيط (play) مع الضمير (I)."
+      },
+      {
+        id: 17,
+        question: "I help people to stay fit and healthy. I am a ............",
+        questionAr: "أساعد الناس على البقاء بلياقة وصحة جيدة. أنا مدرب شخصي.",
+        options: ["personal trainer", "fashion designer", "IT consultant"],
+        correctIndex: 0,
+        explanation: "المدرب البدني الشخصي هو (Personal Trainer)."
+      },
+      {
+        id: 18,
+        question: "I don't like my ............ He is a tough man.",
+        questionAr: "أنا لا أحب مديري في العمل، إنه رجل قاسٍ.",
+        options: ["boss", "salary", "task"],
+        correctIndex: 0,
+        explanation: "الضمير (He) يعود على شخص عاقل وهو المدير (boss)."
+      },
+      {
+        id: 19,
+        question: "He wants to work alone. He doesn't like working in a/an ............",
+        questionAr: "هو يريد أن يعمل بمفرده، لا يحب العمل داخل فريق.",
+        options: ["online", "desk", "team"],
+        correctIndex: 2,
+        explanation: "العمل بمفرده (alone) عكس العمل في فريق (team)."
+      },
+      {
+        id: 20,
+        question: "She didn't ............ to the gym last week.",
+        questionAr: "هي لم تذهب إلى الجيم الأسبوع الماضي.",
+        options: ["go", "went", "going"],
+        correctIndex: 0,
+        explanation: "قاعدة نفي الماضي: بعد (didn't) يجب أن يأتي الفعل في المصدر المجرد (go)."
+      },
+      {
+        id: 21,
+        question: "\"He proposed to her\" means:",
+        questionAr: "عبارة 'طلب يدها للزواج' تعني:",
+        options: ["He proposed to her", "They get divorced", "He didn't have a girlfriend"],
+        correctIndex: 0,
+        explanation: "تعبير (propose to someone) يعني التقدم بطلب الزواج منها (asked her to marry him)."
+      },
+      {
+        id: 22,
+        question: "Choose the right question for the answer: 'He lives near the city.'",
+        questionAr: "اختر السؤال الصحيح للإجابة: 'هو يعيش بالقرب من المدينة.'",
+        options: ["Where does he lives?", "Where he does live?", "Where does he live ?"],
+        correctIndex: 2,
+        explanation: "قاعدة تكوين السؤال: (أداة الاستفهام + does + الفاعل + الفعل في المصدر بدون s) -> Where does he live?"
+      },
+      {
+        id: 23,
+        question: "Choose the right question for the answer: 'He works near the city.'",
+        questionAr: "اختر السؤال الصحيح للإجابة: 'هو يعمل بالقرب من المدينة.'",
+        options: ["Where does he works?", "Where he does work?", "Where does he work?"],
+        correctIndex: 2,
+        explanation: "تكوين السؤال الصحيح يتطلب المصدر بعد does: (Where does he work?)."
+      },
+      {
+        id: 24,
+        question: "When he ............ her to marry him, she said yes.",
+        questionAr: "عندما طلب منها الزواج، وافقت وقالت نعم.",
+        options: ["accepted", "asked", "got"],
+        correctIndex: 1,
+        explanation: "سياق لغوي: (asked her to marry him) تعني طلب منها الزواج."
+      },
+      {
+        id: 25,
+        question: "I ............ in London now.",
+        questionAr: "أنا أعيش في لندن الآن.",
+        options: ["live", "lives", "am living"],
+        correctIndex: 0,
+        explanation: "الفعل (live) عند التعبير عن مكان الإقامة الدائم يُستخدم في المضارع البسيط (live) مع الضمير (I)."
+      },
+      {
+        id: 26,
+        question: "He doesn't like golf, ............ ",
+        questionAr: "هو لا يحب الجولف، لذلك هو لا يلعبه أبداً.",
+        options: ["he never plays it", "he always plays it", "he usually plays it"],
+        correctIndex: 0,
+        explanation: "عدم حب الرياضة يترتب عليه عدم ممارستها نهائياً (never plays it)."
+      },
+      {
+        id: 27,
+        question: "Ahmed can ............ with problems.",
+        questionAr: "أحمد يستطيع التعامل مع المشكلات.",
+        options: ["get", "deal", "rescue"],
+        correctIndex: 1,
+        explanation: "حرف الجر (with) يقترن بالفعل (deal) ليعطي معنى يتعامل مع: (deal with)."
+      },
+      {
+        id: 28,
+        question: "She works hard during the week so she ............ works at weekends.",
+        questionAr: "هي تعمل بجد طوال أيام الأسبوع، لذا نادراً ما تعمل في عطلات نهاية الأسبوع.",
+        options: ["rarely", "always", "usually"],
+        correctIndex: 0,
+        explanation: "كلمة (rarely) تعني نادراً وتتناسب مع سبب إرهاقها طوال الأسبوع."
+      },
+      {
+        id: 29,
+        question: "John loves to be an IT ............ and says he enjoys dealing with computer problems.",
+        questionAr: "جون يحب أن يكون مستشار تكنولوجيا معلومات ويستمتع بحل مشاكل الحاسوب.",
+        options: ["designer", "consultant", "courier"],
+        correctIndex: 1,
+        explanation: "الوظيفة المتعلقة بأنظمة وتكنولوجيا المعلومات والشركات هي (IT consultant)."
+      },
+      {
+        id: 30,
+        question: "There ............ a big storm last night.",
+        questionAr: "كانت هناك عاصفة كبيرة الليلة الماضية.",
+        options: ["were", "was", "is"],
+        correctIndex: 1,
+        explanation: "العاصفة اسم مفرد (a big storm) والزمن ماضٍ بسيط بوجود (last night)، لذا نستخدم (was)."
+      },
+      {
+        id: 31,
+        question: "Joe ............ his emails every morning.",
+        questionAr: "جو يتفقد رسائله الإلكترونية كل صباح.",
+        options: ["checked", "checks", "checking"],
+        correctIndex: 1,
+        explanation: "مضارع بسيط يعبر عن عادة روتينية (every morning) مع فاعل مفرد (Joe) فيأخذ الفعل s."
+      },
+      {
+        id: 32,
+        question: "............ is your birthday? - It's in July.",
+        questionAr: "متى عيد ميلادك؟ - إنه في شهر يوليو.",
+        options: ["When", "What", "Where"],
+        correctIndex: 0,
+        explanation: "للسؤال عن الوقت والتواريخ نستخدم أداة الاستفهام (When)."
+      },
+      {
+        id: 33,
+        question: "............ do you come to school; by bus or by car?",
+        questionAr: "كيف تأتي إلى المدرسة؛ بالحافلة أم بالسيارة؟",
+        options: ["when", "why", "how"],
+        correctIndex: 2,
+        explanation: "للسؤال عن وسيلة المواصلات أو الكيفية نستخدم أداة الاستفهام (How)."
+      },
+      {
+        id: 34,
+        question: "Where ............ she live?",
+        questionAr: "أين تعيش هي؟",
+        options: ["does", "do", "is"],
+        correctIndex: 0,
+        explanation: "في المضارع البسيط مع الفاعل المفرد (she) نستخدم الفعل المساعد (does)."
+      },
+      {
+        id: 35,
+        question: "We ............ go on holidays last year.",
+        questionAr: "نحن لم نذهب في عطلات العام الماضي.",
+        options: ["weren't", "didn't", "don't"],
+        correctIndex: 1,
+        explanation: "لنفي فعل أساسي (go) في زمن الماضي البسيط (last year) نستخدم (didn't)."
+      },
+      {
+        id: 36,
+        question: "............ are you studying English? - Do you need it for your job?",
+        questionAr: "لماذا تدرس الإنجليزية؟ - هل تحتاجها لوظيفتك؟",
+        options: ["how", "when", "why"],
+        correctIndex: 2,
+        explanation: "للسؤال عن السبب والهدف نستخدم أداة الاستفهام (Why)."
+      },
+      {
+        id: 37,
+        question: "They often ............ a barbecue on Sundays.",
+        questionAr: "هم غالباً ما يقيمون حفلة شواء في أيام الأحد.",
+        options: ["have", "go", "spend"],
+        correctIndex: 0,
+        explanation: "متلازمة لغوية: إقامة حفلة شواء تستخدم الفعل (have a barbecue)."
+      },
+      {
+        id: 38,
+        question: "My daughter ............ the piano very well.",
+        questionAr: "ابنتي تعزف على البيانو بشكل ممتاز.",
+        options: ["plays", "has", "goes"],
+        correctIndex: 0,
+        explanation: "العزف على الآلات الموسيقية يأخذ دائماً الفعل (play)."
+      },
+      {
+        id: 39,
+        question: "I moved to a new house in 2019 ............ I didn't like my flat mate.",
+        questionAr: "انتقلت لمنزل جديد في 2019 لأنني لم أكن أحب شريكي في السكن.",
+        options: ["because", "and", "so"],
+        correctIndex: 0,
+        explanation: "أداة الربط الدالة على ذكر السبب والعلة هي (because)."
+      },
+      {
+        id: 40,
+        question: "I wanted to learn Italian, ............ I could travel around the country.",
+        questionAr: "أردت تعلم الإيطالية حتى/لذا أستطيع السفر والتجول في البلاد.",
+        options: ["so", "because", "but"],
+        correctIndex: 0,
+        explanation: "أداة الربط التي تعبر عن النتيجة والغاية المترتبة هي (so)."
+      },
+      {
+        id: 41,
+        question: "A fixed, regular sum of money given to someone for doing a job is a ............",
+        questionAr: "مبلغ مالي ثابت ومنتظم يُدفع لشخص مقابل أداء وظيفة يسمى:",
+        options: ["salary", "bonus", "task"],
+        correctIndex: 0,
+        explanation: "تعريف الراتب (salary): مبلغ منتظم وثابت يدفع شهرياً أو دورياً."
+      },
+      {
+        id: 42,
+        question: "............ time are they going to come?",
+        questionAr: "في أي وقت سيأتون؟",
+        options: ["Which", "Whose", "What"],
+        correctIndex: 2,
+        explanation: "السؤال عن الساعة والوقت يبدأ بتركيب (What time)."
+      },
+      {
+        id: 43,
+        question: "............ gave you the flowers? - My best friend.",
+        questionAr: "من أعطاك هذه الزهور؟ - صديقي المفضل.",
+        options: ["Who", "When", "Which"],
+        correctIndex: 0,
+        explanation: "للسؤال عن الفاعل العاقل نستخدم (Who)."
+      },
+      {
+        id: 44,
+        question: "How ............ legs does an insect have?",
+        questionAr: "كم عدد الأرجل التي تمتلكها الحشرة؟",
+        options: ["Where", "Which", "How many"],
+        correctIndex: 2,
+        explanation: "للسؤال عن الأسماء المعدودة بالجمع (legs) نستخدم (How many)."
+      },
+      {
+        id: 45,
+        question: "He didn't ............ me because I was behind the tree.",
+        questionAr: "هو لم يرني لأنني كنت خلف الشجرة.",
+        options: ["saw", "see", "sees"],
+        correctIndex: 1,
+        explanation: "بعد أداة النفي في الماضي (didn't) نضع الفعل دائماً في المصدر المجرد (see)."
+      },
+      {
+        id: 46,
+        question: "We ............ to the cinema three times last week.",
+        questionAr: "ذهبنا إلى السينما ثلاث مرات الأسبوع الماضي.",
+        options: ["was go", "went", "did go"],
+        correctIndex: 1,
+        explanation: "جملة إثبات في زمن الماضي البسيط بوجود (last week)، والتصريف الثاني لـ (go) هو (went)."
+      },
+      {
+        id: 47,
+        question: "'How much people were there?' - Is this sentence grammatically correct?",
+        questionAr: "هل الجملة 'How much people were there?' صحيحة قواعدياً؟",
+        options: ["True", "false"],
+        correctIndex: 1,
+        explanation: "خطأ (False): كلمة (people) اسم جمع معدود ويجب استخدام (How many) وليس (How much)."
+      },
+      {
+        id: 48,
+        question: "'They didn't began on time.' - Is this sentence correct?",
+        questionAr: "هل جملة 'They didn't began on time' صحيحة؟",
+        options: ["True", "false"],
+        correctIndex: 1,
+        explanation: "خطأ (False): بعد (didn't) يجب أن يعود الفعل لأصله في المصدر (begin) وليس التصريف الثاني (began)."
+      },
+      {
+        id: 49,
+        question: "We ............ in the sea two weeks ago.",
+        questionAr: "سبحنا في البحر منذ أسبوعين.",
+        options: ["swam", "swim", "swimmed"],
+        correctIndex: 0,
+        explanation: "وجود (ago) يدل على الماضي البسيط، والفعل (swim) فعل شاذ تصريفه الثاني هو (swam)."
+      },
+      {
+        id: 50,
+        question: "I ............ a letter to my penpal yesterday.",
+        questionAr: "كتبت خطاباً لصديق المراسلة أمس.",
+        options: ["wrote", "writed", "write"],
+        correctIndex: 0,
+        explanation: "الماضي من الفعل الشاذ (write) هو (wrote) لوجود كلمة (yesterday)."
+      },
+      {
+        id: 51,
+        question: "They became husband and wife. They ............",
+        questionAr: "أصبحا زوجاً وزوجة، هذا يعني أنهما:",
+        options: ["got engaged", "got married", "got divorced"],
+        correctIndex: 1,
+        explanation: "أن يصبحا زوجاً وزوجة يعني تزوجا (got married)."
+      },
+      {
+        id: 52,
+        question: "I don't really like eating ............ I prefer to cook at home.",
+        questionAr: "لا أحب حقاً تناول الطعام في المطاعم خارج المنزل، أفضل الطهي بالبيت.",
+        options: ["have", "on", "out"],
+        correctIndex: 2,
+        explanation: "تعبير اصطلاحي: (eat out) يعني تناول الطعام خارج المنزل في مطعم."
+      },
+      {
+        id: 53,
+        question: "Matt proposed to Fiona ............ she said no.",
+        questionAr: "مات طلب يد فيونا للزواج لكنها رفضت وقالت لا.",
+        options: ["but", "because", "to"],
+        correctIndex: 0,
+        explanation: "أداة الربط (but) تفيد التناقض والتعارض بين الحدثين."
+      },
+      {
+        id: 54,
+        question: "What do people usually do before getting married?",
+        questionAr: "ماذا يفعل الناس عادة قبل إتمام الزواج؟",
+        options: ["get engaged", "split up", "fall out"],
+        correctIndex: 0,
+        explanation: "الخطوة التي تسبق الزواج هي الخطوبة (get engaged)."
+      },
+      {
+        id: 55,
+        question: "Did your friend formerly ............ live here?",
+        questionAr: "هل اعتاد صديقك قديماً أن يعيش هنا؟",
+        options: ["uses to", "using to", "used to", "use to"],
+        correctIndex: 3,
+        explanation: "قاعدة (Used to) في السؤال: بعد الفعل المساعد (Did) نستخدم المصدر المجرد بدون حرف d وهو (use to)."
+      },
+      {
+        id: 56,
+        question: "Clever people! (Choose the exclamation word)",
+        questionAr: "يا لهم من أناس أذكياء! (صيغة تعجب)",
+        options: ["How", "Who", "So", "What"],
+        correctIndex: 2,
+        explanation: "وفقاً لاختبار الجامعة والخيارات المعتمدة: التعبير التعجبي اعتمد الخيار (So clever people!)."
+      },
+      {
+        id: 57,
+        question: "Let's forget about it all, ............?",
+        questionAr: "دعنا ننسى الأمر برمته، أليس كذلك؟ (السؤال المذيل)",
+        options: ["shall we", "let's we", "have we", "won't we"],
+        correctIndex: 0,
+        explanation: "قاعدة السؤال المذيل (Question Tag): الاقتراح الذي يبدأ بـ (Let's) يكون سؤاله المذيل ثابتاً وهو (shall we?)."
+      },
+      {
+        id: 58,
+        question: "His new appointment takes ............ from the beginning of next month.",
+        questionAr: "تعيينه الجديد يبدأ ويسري اعتباراً من بداية الشهر القادم.",
+        options: ["palce", "happen", "post", "position"],
+        correctIndex: 0,
+        explanation: "التعبير اللغوي (take place) يعني يحدث أو يأخذ مجراه/يبدأ سريانه."
+      },
+      {
+        id: 59,
+        question: "You nearly had an accident. You ............ drive more carefully.",
+        questionAr: "كدت تتعرض لحادث. كان ينبغي عليك أن تقود بحذر أكثر.",
+        options: ["have", "should", "had", "ought"],
+        correctIndex: 1,
+        explanation: "للنصيحة بعدم التهور نستخدم فعل الإلزام الخفيف (should + المصدر)، بينما ought تحتاج بعدها to."
+      },
+      {
+        id: 60,
+        question: "Don't you think she is old ............ to decide on the matter for herself?",
+        questionAr: "ألا تعتقد أنها بالغة وكبيرة بما يكفي لتقرر في هذا الأمر بنفسها؟",
+        options: ["enough", "too", "yet", "so"],
+        correctIndex: 0,
+        explanation: "قاعدة (Enough): تأتي بعد الصفة (old enough) لتعني بالقدر الكافي."
+      },
+      {
+        id: 61,
+        question: "Measles ............ considered a dangerous disease any longer.",
+        questionAr: "مرض الحصبة لم يعد يُعتبر مرضاً خطيراً بعد الآن.",
+        options: ["is/any", "is not /any", "are/any", "are not/ any"],
+        correctIndex: 1,
+        explanation: "أسماء الأمراض المنتهية بحرف s مثل (Measles) تعامل معاملة المفرد وتأخذ (is)، ومع وجود (any longer) في النهاية تكون الجملة منفية (is not)."
+      },
+      {
+        id: 62,
+        question: "The news of another terrorist bomb attack ............ received here early on Monday.",
+        questionAr: "أنباء وقوع هجوم إرهابي آخر بقنبلة وردت إلى هنا في وقت مبكر يوم الإثنين.",
+        options: ["have been", "was", "were", "are"],
+        correctIndex: 1,
+        explanation: "كلمة (news / الأخبار) اسم غير معدود يعامل دائماً معاملة المفرد ويأخذ (was) في صيغة المبني للمجهول."
+      },
+      {
+        id: 63,
+        question: "............ front door of ............ house was damaged; we couldn't close it.",
+        questionAr: "الباب الأمامي للمنزل كان متضرراً؛ لم نتمكن من إغلاقه.",
+        options: ["The/the", "A/the", "The/A", "A/The"],
+        correctIndex: 0,
+        explanation: "قاعدة أدوات التعريف: نستخدم (The) لأن الباب الأمامي محدد ومعروف، والمنزل المقصود في السياق محدد أيضاً."
+      },
+      {
+        id: 64,
+        question: "Would you mind ............ the children while I'm away?",
+        questionAr: "هل تمانع في الاعتناء بالأطفال أثناء غيابي؟",
+        options: ["looking for", "looking after", "looking", "looking forward"],
+        correctIndex: 1,
+        explanation: "الفعل المركب (look after) يعني يعتني بـ أو يرعى."
+      },
+      {
+        id: 65,
+        question: "Would you like some more coffee? There's still ............ left.",
+        questionAr: "هل ترغب في المزيد من القهوة؟ ما زال هناك القليل متبقياً.",
+        options: ["little", "a little", "few", "a few"],
+        correctIndex: 1,
+        explanation: "القهوة اسم غير معدود ونعبر عن الكمية القليلة الكافية والمتاحة بـ (a little)."
+      },
+      {
+        id: 66,
+        question: "Then it started to rain heavily and everyone ran for ............",
+        questionAr: "ثم بدأت السماء تمطر بغزارة وركض الجميع طلباً للمأوى والاحتماء.",
+        options: ["shadow", "guard", "shelter", "drought"],
+        correctIndex: 2,
+        explanation: "المأوى الذي يحمي من المطر يُسمى (shelter)."
+      },
+      {
+        id: 67,
+        question: "Both ............ play tennis very well.",
+        questionAr: "كلاهما يلعبان التنس بمهارة فائقة.",
+        options: ["of them", "them", "they", "their"],
+        correctIndex: 0,
+        explanation: "التركيب الصحيح للضمير بعد both هو (Both of them)."
+      },
+      {
+        id: 68,
+        question: "I've told him several times but he ............ doesn't understand.",
+        questionAr: "أخبرته عدة مرات لكنه ما زال لا يفهم.",
+        options: ["still", "yet", "already", "no longer"],
+        correctIndex: 0,
+        explanation: "نستخدم (still) للتعبير عن استمرار وضع معين بالرغم من المحاولات، وتوضع قبل الفعل المنفي (still doesn't)."
+      },
+      {
+        id: 69,
+        question: "That man ............ my purse.",
+        questionAr: "ذلك الرجل سرق محفظتي.",
+        options: ["stole me", "robbed", "stole", "robbed me"],
+        correctIndex: 2,
+        explanation: "الفعل (steal) يأتي بعده الشيء المسروق مباشرة (stole my purse)، بينما (rob) يأتي بعدها الشخص أو المكان المنهوب (robbed me)."
+      },
+      {
+        id: 70,
+        question: "............, there were no houses here.",
+        questionAr: "منذ مائة عام، لم تكن هناك أي منازل هنا.",
+        options: ["A hundred years ago", "Since hundred years ago", "For hundred years ago", "A hundred years"],
+        correctIndex: 0,
+        explanation: "للتعبير عن نقطة زمنية مضت في الماضي البسيط نستخدم الفترة الزمنية متبوعة بـ ago: (A hundred years ago)."
+      },
+      {
+        id: 71,
+        question: "How's the old man?",
+        questionAr: "كيف حال الرجل العجوز؟ (سؤال عن صحته وحالته)",
+        options: ["He's sixty-five.", "That's him", "Mr Smith is the old man.", "He's much better"],
+        correctIndex: 3,
+        explanation: "السؤال بـ (How is...) يستفسر عن الحالة الصحية للرجل، والإجابة المناسبة: هو أفضل بكثير (He's much better)."
+      },
+      {
+        id: 72,
+        question: "My brother, ............ lives in Spain, is coming to visit us.",
+        questionAr: "أخي، الذي يعيش في إسبانيا، قادم لزيارتنا.",
+        options: ["who", "which", "whose", "how"],
+        correctIndex: 0,
+        explanation: "ضمير الوصل العائد على العاقل (My brother) هو (who)."
+      },
+      {
+        id: 73,
+        question: "What ............ behind the house when you were a child?",
+        questionAr: "ماذا كان يوجد خلف المنزل عندما كنت طفلاً؟",
+        options: ["is there", "are there", "was there", "have there"],
+        correctIndex: 2,
+        explanation: "جملة في زمن الماضي بوجود (when you were a child)، والصيغة الماضية للسؤال عن المفرد هي (was there)."
+      },
+      {
+        id: 74,
+        question: "This is ............ exciting book I've ever read.",
+        questionAr: "هذا هو الكتاب الأكثر تشويقاً على الإطلاق الذي قرأته في حياتي.",
+        options: ["most", "the most", "more", "the more"],
+        correctIndex: 1,
+        explanation: "صيغة التفضيل العليا (Superlative) للصفات الطويلة مثل exciting تتطلب (the most + الصفة)."
+      },
+      {
+        id: 75,
+        question: "Oh, he's so big-headed. I can't ............ him.",
+        questionAr: "أوه، إنه مغرور ومتعجرف للغاية. أنا لا أطيقه.",
+        options: ["stand", "across", "swear", "spread"],
+        correctIndex: 0,
+        explanation: "التعبير الاصطلاحي (can't stand someone) يعني لا يطيقه أو لا يحتمله."
+      },
+      {
+        id: 76,
+        question: "They will never agree because they hate ............ other.",
+        questionAr: "لن يتفقوا أبداً لأنهم يكرهون بعضهم البعض.",
+        options: ["each", "every", "two", "one"],
+        correctIndex: 0,
+        explanation: "التعبير المتبادل بين الطرفين هو (each other) بمعنى بعضهما البعض."
+      },
+      {
+        id: 77,
+        question: "I have broken your ............ but don't worry; I'll fix it with this glue.",
+        questionAr: "لقد كسرت مزهريتك ولكن لا تقلق؛ سأصلحها بهذا الغراء.",
+        options: ["balcony", "wallet", "vase", "window"],
+        correctIndex: 2,
+        explanation: "الشيء القابل للكسر والتصليح بالغراء من الخيارات هو المزهرية (vase)."
+      },
+      {
+        id: 78,
+        question: "No, I ............ buy a new one. My old watch was working perfectly after all.",
+        questionAr: "لا، لم أكن بحاجة لشراء واحدة جديدة. فحصت ساعتي القديمة وكانت تعمل بكفاءة.",
+        options: ["should not", "had not", "needn't", "would have"],
+        correctIndex: 2,
+        explanation: "(needn't) تفيد عدم وجود داعٍ أو ضرورة للقيام بالفعل."
+      },
+      {
+        id: 79,
+        question: "............ 1999 that somebody first pointed out the probable future problems.",
+        questionAr: "في عام 1999 أشار أحدهم لأول مرة إلى المشاكل المستقبلية المحتملة.",
+        options: ["In", "It was in", "During", "When"],
+        correctIndex: 1,
+        explanation: "قاعدة الجمل التوكيدية (Cleft Sentences): التركيب يبدأ بـ (It was in + التاريخ + that)."
+      },
+      {
+        id: 80,
+        question: "Don't make noise. Your father wants to get ............ sleep.",
+        questionAr: "لا تصدر ضجيجاً. والدك يريد الحصول على بعض النوم.",
+        options: ["any", "some", "many", "more"],
+        correctIndex: 1,
+        explanation: "في الجمل المثبتة للأسماء غير المعدودة (sleep) نستخدم (some)."
+      },
+      {
+        id: 81,
+        question: "I ............ watching that programme because it is interesting.",
+        questionAr: "أنا أستمتع بمشاهدة ذلك البرنامج لأنه شيق وممتع.",
+        options: ["enjoy", "pleasure", "please", "plus"],
+        correctIndex: 0,
+        explanation: "الفعل (enjoy) يأتي بعده فعل مضاف له (v-ing) مثل (watching)."
+      },
+      {
+        id: 82,
+        question: "Why didn't you send him an invitation? - I ............ send one, but it must have got lost.",
+        questionAr: "لماذا لم ترسل له دعوة؟ - لقد أرسلت بالفعل واحدة، ولكن يبدو أنها فُقدت في البريد.",
+        options: ["would", "could", "did", "can"],
+        correctIndex: 2,
+        explanation: "استخدام (did) قبل الفعل في الجملة المثبتة يفيد التوكيد اللفظي على حدوث الفعل (I did send one = لقد أرسلت حقاً)."
+      },
+      {
+        id: 83,
+        question: "We do not have adequate information to make a decision. 'Adequate' means:",
+        questionAr: "ليس لدينا معلومات كافية لاتخاذ قرار. كلمة (Adequate) تعني:",
+        options: ["enough", "strong", "good", "weak"],
+        correctIndex: 0,
+        explanation: "مرادفات: كلمة (Adequate) تعني كافٍ أو ملائم وتساوي تماماً (enough)."
+      },
+      {
+        id: 84,
+        question: "I broke ............ while I was doing the washing-up.",
+        questionAr: "كسرت كوباً مخصصاً للحليب أثناء قيامي بغسل الصحون.",
+        options: ["a glass of milk", "a milk glass", "a glass for milk", "a glass out milk"],
+        correctIndex: 2,
+        explanation: "وفقاً لاختبار الجامعة: (a glass for milk) تعني كوباً مخصصاً للحليب فارغاً تم كسره أثناء الغسيل."
+      },
+      {
+        id: 85,
+        question: "She's got a much more interesting ............ in the company now.",
+        questionAr: "لقد حصلت على وظيفة أكثر تشويقاً في الشركة الآن.",
+        options: ["job", "work", "employ", "occupation"],
+        correctIndex: 0,
+        explanation: "كلمة (job) اسم معدود يقبل أداة التنكير (a job)، بعكس كلمة (work) التي تعتبر اسماً غير معدود."
+      },
+      {
+        id: 86,
+        question: "I'd rather have it grilled ............ boiled.",
+        questionAr: "أفضل أن أتناوله مشوياً على أن يكون مسلوقاً.",
+        options: ["too", "than", "for", "yet"],
+        correctIndex: 1,
+        explanation: "التركيب التفضيلي: (would rather ... than ...) للمفاضلة بين أمرين."
+      },
+      {
+        id: 87,
+        question: "Mary wants to know if she can bring a friend of ............ to the party.",
+        questionAr: "تريد ماري أن تعرف ما إذا كان بإمكانها إحضار صديقة لها إلى الحفلة.",
+        options: ["his", "hers", "her", "she"],
+        correctIndex: 2,
+        explanation: "وفقاً لنموذج التصحيح المعتمد في نظام الجامعة، تم اختيار (a friend of her)."
+      },
+      {
+        id: 88,
+        question: "This ............ look like my umbrella; it ............ yours.",
+        questionAr: "هذه لا تبدو مثل مظلتي؛ لا بد أنها ملكك أنت.",
+        options: ["doesn't / must be", "isn't / must be", "isn't / must not be", "won't / must be"],
+        correctIndex: 0,
+        explanation: "الفعل (look like) فعل عادي يُنفى في المضارع بـ (doesn't)، والاستنتاج المؤكد في الشق الثاني يكون بـ (must be)."
+      },
+      {
+        id: 89,
+        question: "I don't think that was a very ............ decision. They are bound to rise up against it.",
+        questionAr: "لا أعتقد أنه كان قراراً حكيماً، فمن المؤكد أنهم سيثورون ضده.",
+        options: ["wise", "huge", "enormous", "magical"],
+        correctIndex: 0,
+        explanation: "القرارات توصف بالحكمة (a wise decision)."
+      },
+      {
+        id: 90,
+        question: "The new system is more efficient and ............ than the old one.",
+        questionAr: "النظام الجديد أكثر كفاءة وأقل تكلفة من النظام القديم.",
+        options: ["less expensive", "cheap", "less cheap", "cheapest"],
+        correctIndex: 0,
+        explanation: "مقارنة متوازية بوجود (and): (more efficient and less expensive)."
+      },
+      {
+        id: 91,
+        question: "A(n) ............ does oral translation from one language to another.",
+        questionAr: "هو الشخص الذي يقوم بالترجمة الشفهية الفورية من لغة إلى أخرى.",
+        options: ["interpreter", "reporter", "translate", "transporter"],
+        correctIndex: 0,
+        explanation: "المترجم الشفهي الفوري يُسمى (interpreter)، بينما (translator) هو المترجم التحريري."
+      },
+      {
+        id: 92,
+        question: "............ beautifully she dances tonight!",
+        questionAr: "يا لجمال رقصها الليلة! (أسلوب تعجب)",
+        options: ["What", "How", "Why", "Who"],
+        correctIndex: 1,
+        explanation: "قاعدة التعجب: إذا تلت أداة التعجب حال (Adverb) أو صفة مفردة نستخدم (How + Adverb/Adjective): How beautifully!"
+      },
+      {
+        id: 93,
+        question: "My memories of you are so warm and ............ that I can never forget you.",
+        questionAr: "ذكرياتي معك دافئة وعميقة لدرجة أنني لا أستطيع نسيانك أبداً.",
+        options: ["deep", "famous", "gear", "fore"],
+        correctIndex: 0,
+        explanation: "الذكريات المؤثرة توصف بكونها عميقة (deep memories)."
+      },
+      {
+        id: 94,
+        question: "Jack ............ his thick coat because it was snowing.",
+        questionAr: "ارتدى جاك معطفه الثقيل لأن السماء كانت تثلج.",
+        options: ["put on", "puts on", "take on", "take off"],
+        correctIndex: 0,
+        explanation: "الزمن ماضٍ (was snowing)، والفعل (put on / يرتدي) ماضيه يظل كما هو (put on) بدون تغيير."
+      },
+      {
+        id: 95,
+        question: "Yes, you may borrow my pocket-knife ............ you don't cut yourself with it.",
+        questionAr: "نعم، يمكنك استعارة مطواتي الصغيرة طالما أنك لن تجرح نفسك بها.",
+        options: ["as long as", "as soon as", "so", "however"],
+        correctIndex: 0,
+        explanation: "أداة الشرط (as long as) تعني 'طالما' أو 'بشرط أن'."
+      },
+      {
+        id: 96,
+        question: "I'm going to the supermarket ............ a few things.",
+        questionAr: "أنا ذاهب إلى السوبرماركت لشراء بعض الأشياء.",
+        options: ["for buy", "to buy", "to buying", "buy"],
+        correctIndex: 1,
+        explanation: "لام التعليل للهدف (Infinitive of purpose) تكون بـ (to + المصدر المجرد): to buy."
+      },
+      {
+        id: 97,
+        question: "The work had ............ under extremely difficult conditions.",
+        questionAr: "كان لا بد من إنجاز العمل تحت ظروف قاسية للغاية.",
+        options: ["had done", "had to be done", "is doing", "done"],
+        correctIndex: 1,
+        explanation: "صيغة الإلزام المبني للمجهول في الماضي: (had to be + التصريف الثالث Past Participle)."
+      },
+      {
+        id: 98,
+        question: "The winner of the competition is going to receive a ............ of $20,000.",
+        questionAr: "الفائز في المسابقة سيحصل على جائزة/مكافأة قدرها 20 ألف دولار.",
+        options: ["fare", "price", "reward", "cost"],
+        correctIndex: 2,
+        explanation: "المكافأة التقديرية أو المالية للفائزين تُسمى (reward)."
+      },
+      {
+        id: 99,
+        question: "I'll be sad when I have to give ............ playing tennis.",
+        questionAr: "سأكون حزيناً عندما أضطر للتوقف عن ممارسة التنس.",
+        options: ["out", "up", "in", "at"],
+        correctIndex: 1,
+        explanation: "الفعل المركب (give up) يعني يقلع عن أو يتوقف عن ممارسة عادة معينة."
+      },
+      {
+        id: 100,
+        question: "What date is it? - It's ............",
+        questionAr: "ما هو تاريخ اليوم؟ - إنه الرابع من يوليو.",
+        options: ["the fourth of July", "fourth July", "of July the fourth", "the July fourth"],
+        correctIndex: 0,
+        explanation: "الصيغة الإنجليزية السليمة لنطق وكتابة التواريخ الترتيبية: (the fourth of July)."
+      },
+      {
+        id: 101,
+        question: "I'm now going to give you 10 ............ tips for running a really successful website.",
+        questionAr: "سأقدم لك الآن 10 نصائح لا تُقدّر بثمن لإدارة موقع إلكتروني ناجح جداً.",
+        options: ["worth", "worthy", "worthless", "invaluable"],
+        correctIndex: 3,
+        explanation: "صفة (invaluable) تعني قيّمة جداً ولا تُقدر بثمن، بعكس (worthless) التي تعني عديم القيمة."
+      },
+      {
+        id: 102,
+        question: "Can you tell us ............ your purpose is in visiting this country at this time of the year?",
+        questionAr: "هل يمكنك أن تخبرنا ما هو غرضك من زيارة هذا البلد في هذا الوقت من العام؟",
+        options: ["why", "where", "what", "how"],
+        correctIndex: 2,
+        explanation: "السؤال عن ماهية الشيء (your purpose) يأخذ (what): What your purpose is."
+      },
+      {
+        id: 103,
+        question: "He isn't ............ to reach the ceiling.",
+        questionAr: "هو ليس طويلاً بما يكفي ليصل إلى السقف.",
+        options: ["enough tall", "tall enough", "as tall", "as tall as"],
+        correctIndex: 1,
+        explanation: "قاعدة (enough): توضع الصفة دائماً قبل كلمة enough وليس بعدها: (tall enough)."
+      },
+      {
+        id: 104,
+        question: "............ we found in the drawer was completely useless.",
+        questionAr: "الشيء الذي وجدناه في الدرج كان عديم الفائدة تماماً.",
+        options: ["Where", "When", "What", "How"],
+        correctIndex: 2,
+        explanation: "اسم الموصول المدمج الذي يعني 'الشيء الذي' في بداية الجملة الاسمية هو (What)."
+      },
+      {
+        id: 105,
+        question: "They gave ............",
+        questionAr: "أعطوا الفتيات بعض الكتب.",
+        options: ["the girls some books", "to the girls some books", "to them some books", "some books the girls"],
+        correctIndex: 0,
+        explanation: "قاعدة المفعولين: (الفعل + المفعول غير المباشر العاقل + المفعول المباشر غير العاقل): gave the girls some books بدون حرف جر to."
+      },
+      {
+        id: 106,
+        question: "Good ............ ! I hope you win.",
+        questionAr: "حظاً سعيداً! أتمنى لك الفوز.",
+        options: ["wish", "look", "luck", "lock"],
+        correctIndex: 2,
+        explanation: "العبارة الشهيرة للتمني بالتوفيق هي (Good luck)."
+      },
+      {
+        id: 107,
+        question: "You must all look after ............ on your trip back home.",
+        questionAr: "يجب عليكم جميعاً أن تعتنوا بأنفسكم أثناء رحلة عودتكم للمنزل.",
+        options: ["yourself", "yourselves", "your self", "yours"],
+        correctIndex: 1,
+        explanation: "وجود كلمة (all) تشير إلى أن الخطاب موجه للجمع، والضمير المنعكس المخاطب للجمع هو (yourselves)."
+      },
+      {
+        id: 108,
+        question: "We had a lovely time. It was ............ good party.",
+        questionAr: "أمضينا وقتاً رائعاً. لقد كانت حفلة جيدة جداً.",
+        options: ["such a", "such", "so", "too"],
+        correctIndex: 0,
+        explanation: "قاعدة (Such a/an): تستخدم قبل (الصفة + الاسم المفرد المعدود): such a good party."
+      },
+      {
+        id: 109,
+        question: "I don't allow my children ............ so badly.",
+        questionAr: "أنا لا أسمح لأطفالي بالتصرف بمثل هذا السوء.",
+        options: ["to behave", "behaves", "behaved", "behaviour"],
+        correctIndex: 0,
+        explanation: "قاعدة الفعل (allow): يأتي المفعول به متبوعاً بـ (to + المصدر): allow someone to do something."
+      },
+      {
+        id: 110,
+        question: "Philosophers try to find out the ............ of life.",
+        questionAr: "يحاول الفلاسفة اكتشاف معنى الحياة وجوهرها.",
+        options: ["meaning", "sadness", "length", "weight"],
+        correctIndex: 0,
+        explanation: "البحث الفلسفي يتمحور حول معنى الوجود والحياة (the meaning of life)."
+      },
+      {
+        id: 111,
+        question: "He had already left when we ............ there.",
+        questionAr: "كان قد غادر بالفعل عندما وصلنا إلى هناك.",
+        options: ["get", "go", "got", "gets"],
+        correctIndex: 2,
+        explanation: "قاعدة الماضي التام والماضي البسيط: الحدث الأقدم يأخذ ماضياً تاماً (had left)، بينما الحدث الأحدث مع (when) يأخذ ماضياً بسيطاً (got)."
+      },
+      {
+        id: 112,
+        question: "Leave it to your daughter, and she'll get ............ to either a davul-player or a zurna-player.",
+        questionAr: "اترك الأمر لابنتك وستصبح صديقة/متقاربة إما مع عازف طبلة أو عازف مزمار.",
+        options: ["engaged", "friendly", "interested", "interest"],
+        correctIndex: 1,
+        explanation: "وفقاً لنموذج الامتحان المعتمد في المنصة، الإجابة الصحيحة هي (friendly)."
+      },
+      {
+        id: 113,
+        question: "The doctors tried everything they could to ............ the patient's blood pressure.",
+        questionAr: "بذل الأطباء كل ما في وسعهم لخفض ضغط دم المريض.",
+        options: ["produce", "save", "reduce", "pruise"],
+        correctIndex: 2,
+        explanation: "المصطلح الطبي لخفض وتقليل ضغط الدم المرتفع هو (reduce blood pressure)."
+      },
+      {
+        id: 114,
+        question: "The furniture for their house has cost them a large ............ of money.",
+        questionAr: "أثاث منزلهم كلفهم قدراً كبيراً ومبلغاً ضخماً من المال.",
+        options: ["number", "amount", "lot", "piece"],
+        correctIndex: 1,
+        explanation: "النقود (money) اسم غير معدود، لذا نستخدم معه (a large amount of money)."
+      },
+      {
+        id: 115,
+        question: "............ birds can fly very high in the sky.",
+        questionAr: "تستطيع الطيور الطيران بارتفاع كبير في السماء.",
+        options: ["no article", "The", "A", "An"],
+        correctIndex: 0,
+        explanation: "عند الحديث عن فئة عامة بالجمع بصيغة العموم (الطيور بوجه عام) لا نستخدم أداة تعريف (no article)."
+      },
+      {
+        id: 116,
+        question: "They treated him ............ a king when he won all that money.",
+        questionAr: "عاملوه مثل الملك عندما ربح كل تلك الأموال.",
+        options: ["as", "as being", "like", "like he was"],
+        correctIndex: 2,
+        explanation: "للتشبيه والمماثلة بمظهر أو صفة شخص آخر يأتي بعد الفعل (like + الاسم): treated him like a king."
+      },
+      {
+        id: 117,
+        question: "Now, ............ the ball to the person on your right.",
+        questionAr: "الآن، ارمِ الكرة للشخص الذي على يمينك.",
+        options: ["throw", "jump", "pull", "burst"],
+        correctIndex: 0,
+        explanation: "الفعل المناسب لحركة الكرة وتمريرها باليد هو (throw / ارمِ)."
+      },
+      {
+        id: 118,
+        question: "If you ............ stop this nonsense at once, I'll tell your pa.",
+        questionAr: "إذا لم توقف هذا الهراء فوراً، سأخبر والدك.",
+        options: ["didn't / I'd", "don't / will", "will / I won't", "will / will"],
+        correctIndex: 1,
+        explanation: "الحالة الشرطية الأولى (First Conditional): بعد if مضارع بسيط (don't stop) وجواب الشرط مستقبل بسيط (I will tell)."
+      },
+      {
+        id: 119,
+        question: "Further research is needed to find out what side ............ this pill has on a person's digestive system.",
+        questionAr: "هناك حاجة للمزيد من الأبحاث لمعرفة الآثار الجانبية لهذه الحبة على الجهاز الهضمي.",
+        options: ["affects", "effects", "reflects", "defects"],
+        correctIndex: 1,
+        explanation: "المصطلح الطبي للأعراض والآثار الجانبية هو (side effects)، حيث (effect) اسم بمعنى أثر، بينما (affect) فعل بمعنى يؤثر."
+      },
+      {
+        id: 120,
+        question: "That's the hotel ............ we stayed last year.",
+        questionAr: "هذا هو الفندق الذي أقمنا فيه العام الماضي.",
+        options: ["where", "which", "who", "whose"],
+        correctIndex: 0,
+        explanation: "ضمير الوصل الدال على المكان المقترن بحدوث فعل داخله هو (where)."
+      }
+    ];
+
+    // State
+    let userAnswers = {};
+    let currentMode = 'practice';
+    let currentFilter = 'all';
+
+    // DOM Elements
+    const questionsContainer = document.getElementById('questionsContainer');
+    const navigatorGrid = document.getElementById('navigatorGrid');
+    const headerCorrect = document.getElementById('headerCorrectCount');
+    const headerWrong = document.getElementById('headerWrongCount');
+    const progressBar = document.getElementById('progressBar');
+    const progressStatus = document.getElementById('progressStatus');
+    const totalBadge = document.getElementById('totalCountBadge');
+    const wrongBadge = document.getElementById('wrongCountBadge');
+    const unansweredBadge = document.getElementById('unansweredCountBadge');
+    const examSubmitContainer = document.getElementById('examSubmitContainer');
+    const finishExamBtn = document.getElementById('finishExamBtn');
+    const modePractice = document.getElementById('modePractice');
+    const modeTest = document.getElementById('modeTest');
+
+    totalBadge.textContent = questionsData.length;
+
+    function init() {
+      renderQuestions();
+      renderNavigator();
+      updateStats();
+      attachEvents();
+    }
+
+    function attachEvents() {
+      modePractice.addEventListener('click', () => switchMode('practice'));
+      modeTest.addEventListener('click', () => switchMode('test'));
+      document.getElementById('resetQuizBtn').addEventListener('click', restartQuiz);
+      finishExamBtn.addEventListener('click', submitExam);
+
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          document.querySelectorAll('.filter-btn').forEach(b => {
+            b.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-bold', 'border', 'border-indigo-200');
+            b.classList.add('text-slate-600');
+          });
+          btn.classList.add('bg-indigo-50', 'text-indigo-700', 'font-bold', 'border', 'border-indigo-200');
+          btn.classList.remove('text-slate-600');
+          currentFilter = btn.dataset.filter;
+          filterQuestions();
+        });
+      });
+    }
+
+    function switchMode(mode) {
+      currentMode = mode;
+      if (mode === 'practice') {
+        modePractice.className = "px-3 py-1.5 rounded-lg bg-white shadow text-indigo-700 font-bold transition";
+        modeTest.className = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-indigo-700 transition font-medium";
+        examSubmitContainer.classList.add('hidden');
+      } else {
+        modeTest.className = "px-3 py-1.5 rounded-lg bg-white shadow text-indigo-700 font-bold transition";
+        modePractice.className = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-indigo-700 transition font-medium";
+        examSubmitContainer.classList.remove('hidden');
+      }
+      renderQuestions();
+      renderNavigator();
+      updateStats();
+    }
+
+    function renderQuestions() {
+      questionsContainer.innerHTML = '';
+
+      questionsData.forEach((q, idx) => {
+        const isAnswered = userAnswers.hasOwnProperty(q.id);
+        const selectedIdx = userAnswers[q.id];
+        const isCorrect = isAnswered && selectedIdx === q.correctIndex;
+
+        const card = document.createElement('div');
+        card.className = `question-card bg-white rounded-2xl p-5 border border-slate-200 custom-shadow transition-all duration-200`;
+        card.id = `q-card-${q.id}`;
+        card.dataset.id = q.id;
+
+        let statusBadge = '';
+        if (currentMode === 'practice' && isAnswered) {
+          statusBadge = isCorrect
+            ? `<span class="bg-emerald-100 text-emerald-700 font-bold px-2.5 py-1 rounded-full text-xs flex items-center gap-1">✓ إجابة صحيحة</span>`
+            : `<span class="bg-rose-100 text-rose-700 font-bold px-2.5 py-1 rounded-full text-xs flex items-center gap-1">✕ إجابة خاطئة</span>`;
+        }
+
+        let optionsHtml = '';
+        q.options.forEach((opt, optIdx) => {
+          let optClasses = "border-slate-200 hover:bg-slate-50 text-slate-700";
+          let circleContent = String.fromCharCode(65 + optIdx);
+          let circleClasses = "border-slate-300 text-slate-500 bg-white";
+
+          if (isAnswered) {
+            if (currentMode === 'practice') {
+              if (optIdx === q.correctIndex) {
+                optClasses = "bg-emerald-50/80 border-emerald-500 text-emerald-900 font-semibold";
+                circleClasses = "bg-emerald-600 border-emerald-600 text-white";
+                circleContent = "✓";
+              } else if (optIdx === selectedIdx && !isCorrect) {
+                optClasses = "bg-rose-50/80 border-rose-500 text-rose-900 font-semibold";
+                circleClasses = "bg-rose-600 border-rose-600 text-white";
+                circleContent = "✕";
+              } else {
+                optClasses = "opacity-60 border-slate-200 text-slate-500";
+              }
+            } else {
+              if (optIdx === selectedIdx) {
+                optClasses = "bg-indigo-50 border-indigo-600 text-indigo-900 font-semibold";
+                circleClasses = "bg-indigo-600 border-indigo-600 text-white";
+              }
+            }
+          }
+
+          optionsHtml += `
+            <button
+              onclick="selectAnswer(${q.id}, ${optIdx})"
+              class="w-full text-left font-en p-3 sm:p-3.5 rounded-xl border-2 ${optClasses} transition-all duration-150 flex items-start gap-3 group text-sm"
+              ${currentMode === 'practice' && isAnswered ? 'disabled' : ''}
+            >
+              <span class="w-6 h-6 rounded-lg border flex-shrink-0 flex items-center justify-center text-xs font-bold ${circleClasses} transition">
+                ${circleContent}
+              </span>
+              <span class="flex-1 pt-0.5 leading-relaxed">${escapeHtml(opt)}</span>
+            </button>
+          `;
+        });
+
+        let explanationHtml = '';
+        if (currentMode === 'practice' && isAnswered) {
+          explanationHtml = `
+            <div class="mt-4 p-3.5 bg-slate-50 rounded-xl border-r-4 ${isCorrect ? 'border-r-emerald-500' : 'border-r-rose-500'} text-xs sm:text-sm text-slate-700 leading-relaxed">
+              <strong class="font-bold text-slate-900 block mb-1">💡 شرح القاعدة والتصحيح:</strong>
+              ${q.explanation}
+            </div>
+          `;
+        }
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between gap-3 mb-2 border-b border-slate-100 pb-2">
+            <span class="text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg">
+              السؤال ${idx + 1}
+            </span>
+            <div id="status-tag-${q.id}">
+              ${statusBadge}
+            </div>
+          </div>
+          
+          <p class="font-en text-base sm:text-lg font-bold text-slate-800 mb-1 leading-relaxed">
+            ${escapeHtml(q.question)}
+          </p>
+
+          <div class="bg-indigo-50/60 text-indigo-950 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold mb-3 flex items-center gap-1.5 border border-indigo-100">
+            <span class="text-indigo-500 font-bold">الترجمة:</span>
+            <span>${escapeHtml(q.questionAr)}</span>
+          </div>
+
+          <div class="space-y-2.5">
+            ${optionsHtml}
+          </div>
+          <div id="explanation-box-${q.id}">
+            ${explanationHtml}
+          </div>
+        `;
+
+        questionsContainer.appendChild(card);
+      });
+
+      filterQuestions();
+    }
+
+    function renderNavigator() {
+      navigatorGrid.innerHTML = '';
+      questionsData.forEach((q, idx) => {
+        const isAnswered = userAnswers.hasOwnProperty(q.id);
+        const selectedIdx = userAnswers[q.id];
+        const isCorrect = isAnswered && selectedIdx === q.correctIndex;
+
+        let btnClass = "bg-slate-100 text-slate-600 hover:bg-slate-200";
+
+        if (isAnswered) {
+          if (currentMode === 'practice') {
+            btnClass = isCorrect
+              ? "bg-emerald-500 text-white font-bold"
+              : "bg-rose-500 text-white font-bold";
+          } else {
+            btnClass = "bg-indigo-600 text-white font-bold";
+          }
+        }
+
+        const navBtn = document.createElement('button');
+        navBtn.className = `w-8 h-8 rounded-lg text-xs transition active:scale-90 flex items-center justify-center ${btnClass}`;
+        navBtn.textContent = idx + 1;
+        navBtn.onclick = () => scrollToQuestion(q.id);
+        navigatorGrid.appendChild(navBtn);
+      });
+    }
+
+    function selectAnswer(questionId, optionIndex) {
+      userAnswers[questionId] = optionIndex;
+      renderQuestions();
+      renderNavigator();
+      updateStats();
+    }
+
+    function scrollToQuestion(id) {
+      const el = document.getElementById(`q-card-${id}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('ring-2', 'ring-indigo-500');
+        setTimeout(() => el.classList.remove('ring-2', 'ring-indigo-500'), 1200);
+      }
+    }
+
+    function updateStats() {
+      let correct = 0;
+      let wrong = 0;
+      const total = questionsData.length;
+      const answeredCount = Object.keys(userAnswers).length;
+
+      questionsData.forEach(q => {
+        if (userAnswers.hasOwnProperty(q.id)) {
+          if (userAnswers[q.id] === q.correctIndex) {
+            correct++;
+          } else {
+            wrong++;
+          }
+        }
+      });
+
+      headerCorrect.textContent = correct;
+      headerWrong.textContent = wrong;
+      wrongBadge.textContent = wrong;
+      unansweredBadge.textContent = total - answeredCount;
+
+      const progressPercent = (answeredCount / total) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+      progressStatus.textContent = `${answeredCount} / ${total}`;
+    }
+
+    function filterQuestions() {
+      const cards = document.querySelectorAll('.question-card');
+      cards.forEach(card => {
+        const qId = parseInt(card.dataset.id);
+        const isAnswered = userAnswers.hasOwnProperty(qId);
+        const isCorrect = isAnswered && userAnswers[qId] === questionsData.find(q => q.id === qId).correctIndex;
+
+        if (currentFilter === 'all') {
+          card.classList.remove('hidden');
+        } else if (currentFilter === 'wrong') {
+          if (isAnswered && !isCorrect) {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
+        } else if (currentFilter === 'unanswered') {
+          if (!isAnswered) {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
+        }
+      });
+    }
+
+    function submitExam() {
+      let correct = 0;
+      const total = questionsData.length;
+      questionsData.forEach(q => {
+        if (userAnswers[q.id] === q.correctIndex) correct++;
+      });
+
+      const percentage = Math.round((correct / total) * 100);
+      document.getElementById('finalScoreDisplay').textContent = `${correct} / ${total}`;
+      document.getElementById('finalPercentage').textContent = `${percentage}% - ${percentage >= 60 ? 'ناجح ✅' : 'يحتاج إلى مراجعة ⚠️'}`;
+
+      if (percentage >= 80) {
+        document.getElementById('modalIcon').textContent = '🌟';
+        document.getElementById('modalTitle').textContent = 'ممتاز! نتيجة رائعة';
+      } else if (percentage >= 50) {
+        document.getElementById('modalIcon').textContent = '👍';
+        document.getElementById('modalTitle').textContent = 'أداء جيد، راجع الأخطاء';
+      } else {
+        document.getElementById('modalIcon').textContent = '📚';
+        document.getElementById('modalTitle').textContent = 'حاول مرة أخرى لتحسين مستواك';
+      }
+
+      document.getElementById('resultModal').classList.remove('hidden');
+      switchMode('practice');
+    }
+
+    function closeModal() {
+      document.getElementById('resultModal').classList.add('hidden');
+    }
+
+    function restartQuiz() {
+      if (confirm("هل تريد إعادة ضبط جميع الإجابات والبدء من جديد؟")) {
+        userAnswers = {};
+        closeModal();
+        renderQuestions();
+        renderNavigator();
+        updateStats();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
